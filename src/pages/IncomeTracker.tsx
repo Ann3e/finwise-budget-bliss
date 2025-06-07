@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -32,23 +31,33 @@ import {
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import ChatbotButton from "@/components/ChatbotButton";
+import IncomeForm from "@/components/IncomeForm";
+import { useTheme } from "@/contexts/ThemeContext";
 
 const IncomeTracker = () => {
-  const [darkMode, setDarkMode] = useState(false);
+  const { theme, toggleTheme } = useTheme();
   const [selectedEntries, setSelectedEntries] = useState<number[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [filterMonth, setFilterMonth] = useState("all");
   const [showRecurring, setShowRecurring] = useState(false);
-  const [currency, setCurrency] = useState("USD");
-  const [goalAmount, setGoalAmount] = useState(5000);
+  const [currency, setCurrency] = useState("INR");
+  const [goalAmount, setGoalAmount] = useState(50000);
 
   // Sample data
-  const incomeEntries = [
-    { id: 1, source: "Salary", amount: 3500, category: "Employment", date: "2024-01-15", method: "Bank Transfer", recurring: true, frequency: "Monthly" },
-    { id: 2, source: "Freelance Project", amount: 800, category: "Freelance", date: "2024-01-10", method: "PayPal", recurring: false },
-    { id: 3, source: "Stock Dividends", amount: 150, category: "Investment", date: "2024-01-05", method: "Bank Transfer", recurring: true, frequency: "Quarterly" },
-    { id: 4, source: "Side Business", amount: 600, category: "Business", date: "2024-01-20", method: "Cash", recurring: false },
-  ];
+  const [incomeEntries, setIncomeEntries] = useState([
+    { id: 1, source: "Salary", amount: 35000, category: "Employment", date: "2024-01-15", method: "Bank Transfer", recurring: true, frequency: "Monthly" },
+    { id: 2, source: "Freelance Project", amount: 8000, category: "Freelance", date: "2024-01-10", method: "UPI", recurring: false },
+    { id: 3, source: "Stock Dividends", amount: 1500, category: "Investment", date: "2024-01-05", method: "Bank Transfer", recurring: true, frequency: "Quarterly" },
+    { id: 4, source: "Side Business", amount: 6000, category: "Business", date: "2024-01-20", method: "Cash", recurring: false },
+  ]);
+
+  const handleAddIncome = (data: any) => {
+    const newEntry = {
+      id: incomeEntries.length + 1,
+      ...data
+    };
+    setIncomeEntries(prev => [...prev, newEntry]);
+  };
 
   const totalIncome = incomeEntries.reduce((sum, entry) => sum + entry.amount, 0);
   const goalProgress = (totalIncome / goalAmount) * 100;
@@ -80,20 +89,20 @@ const IncomeTracker = () => {
   });
 
   return (
-    <div className={`min-h-screen ${darkMode ? 'dark bg-gray-900' : 'bg-gray-50'}`}>
+    <div className="min-h-screen bg-background">
       <Navbar />
       
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">Income Tracker</h1>
-            <p className="text-gray-600 dark:text-gray-300">Monitor and analyze your income streams</p>
+            <h1 className="text-3xl font-bold text-foreground mb-2">Income Tracker</h1>
+            <p className="text-muted-foreground">Monitor and analyze your income streams</p>
           </div>
           <div className="flex items-center space-x-4 mt-4 sm:mt-0">
             <div className="flex items-center space-x-2">
               <Sun className="h-4 w-4" />
-              <Switch checked={darkMode} onCheckedChange={setDarkMode} />
+              <Switch checked={theme === 'dark'} onCheckedChange={toggleTheme} />
               <Moon className="h-4 w-4" />
             </div>
             <Select value={currency} onValueChange={setCurrency}>
@@ -101,27 +110,24 @@ const IncomeTracker = () => {
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
+                <SelectItem value="INR">INR</SelectItem>
                 <SelectItem value="USD">USD</SelectItem>
                 <SelectItem value="EUR">EUR</SelectItem>
                 <SelectItem value="GBP">GBP</SelectItem>
-                <SelectItem value="INR">INR</SelectItem>
               </SelectContent>
             </Select>
-            <Button className="bg-green-600 hover:bg-green-700">
-              <Plus className="h-4 w-4 mr-2" />
-              Add Income
-            </Button>
+            <IncomeForm onSubmit={handleAddIncome} />
           </div>
         </div>
 
         {/* Dashboard Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <Card className="bg-white dark:bg-gray-800 border-0 shadow-lg">
+          <Card className="bg-card border-0 shadow-lg">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600 dark:text-gray-300">Total Income</p>
-                  <p className="text-2xl font-bold text-gray-900 dark:text-white">${totalIncome.toLocaleString()}</p>
+                  <p className="text-sm font-medium text-muted-foreground">Total Income</p>
+                  <p className="text-2xl font-bold text-foreground">₹{totalIncome.toLocaleString()}</p>
                   <p className="text-xs text-green-600 flex items-center mt-1">
                     <TrendingUp className="h-3 w-3 mr-1" />
                     +12% from last month
@@ -132,39 +138,39 @@ const IncomeTracker = () => {
             </CardContent>
           </Card>
 
-          <Card className="bg-white dark:bg-gray-800 border-0 shadow-lg">
+          <Card className="bg-card border-0 shadow-lg">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600 dark:text-gray-300">Monthly Goal</p>
-                  <p className="text-2xl font-bold text-gray-900 dark:text-white">${goalAmount.toLocaleString()}</p>
+                  <p className="text-sm font-medium text-muted-foreground">Monthly Goal</p>
+                  <p className="text-2xl font-bold text-foreground">₹{goalAmount.toLocaleString()}</p>
                   <Progress value={goalProgress} className="mt-2" />
-                  <p className="text-xs text-gray-600 dark:text-gray-300 mt-1">{goalProgress.toFixed(1)}% achieved</p>
+                  <p className="text-xs text-muted-foreground mt-1">{goalProgress.toFixed(1)}% achieved</p>
                 </div>
                 <Target className="h-8 w-8 text-blue-600" />
               </div>
             </CardContent>
           </Card>
 
-          <Card className="bg-white dark:bg-gray-800 border-0 shadow-lg">
+          <Card className="bg-card border-0 shadow-lg">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600 dark:text-gray-300">Active Sources</p>
-                  <p className="text-2xl font-bold text-gray-900 dark:text-white">{incomeEntries.length}</p>
-                  <p className="text-xs text-gray-600 dark:text-gray-300 mt-1">{recurringEntries.length} recurring</p>
+                  <p className="text-sm font-medium text-muted-foreground">Active Sources</p>
+                  <p className="text-2xl font-bold text-foreground">{incomeEntries.length}</p>
+                  <p className="text-xs text-muted-foreground mt-1">{recurringEntries.length} recurring</p>
                 </div>
                 <BarChart3 className="h-8 w-8 text-purple-600" />
               </div>
             </CardContent>
           </Card>
 
-          <Card className="bg-white dark:bg-gray-800 border-0 shadow-lg">
+          <Card className="bg-card border-0 shadow-lg">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600 dark:text-gray-300">Avg per Source</p>
-                  <p className="text-2xl font-bold text-gray-900 dark:text-white">${(totalIncome / incomeEntries.length).toFixed(0)}</p>
+                  <p className="text-sm font-medium text-muted-foreground">Avg per Source</p>
+                  <p className="text-2xl font-bold text-foreground">₹{(totalIncome / incomeEntries.length).toFixed(0)}</p>
                   <p className="text-xs text-blue-600 flex items-center mt-1">
                     <Bell className="h-3 w-3 mr-1" />
                     2 payments due
@@ -179,24 +185,24 @@ const IncomeTracker = () => {
         {/* AI Insights Panel */}
         <Card className="mb-8 bg-gradient-to-r from-green-50 to-blue-50 dark:from-gray-800 dark:to-gray-700 border-0 shadow-lg">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-gray-900 dark:text-white">
+            <CardTitle className="flex items-center gap-2 text-foreground">
               <Lightbulb className="h-5 w-5 text-yellow-500" />
               AI-Powered Insights
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="grid md:grid-cols-3 gap-4">
-              <div className="bg-white dark:bg-gray-800 p-4 rounded-lg">
+              <div className="bg-card p-4 rounded-lg">
                 <h4 className="font-semibold text-green-600 mb-2">Optimization Tip</h4>
-                <p className="text-sm text-gray-600 dark:text-gray-300">Your freelance income has grown 40% this quarter. Consider raising your rates!</p>
+                <p className="text-sm text-muted-foreground">Your freelance income has grown 40% this quarter. Consider raising your rates!</p>
               </div>
-              <div className="bg-white dark:bg-gray-800 p-4 rounded-lg">
+              <div className="bg-card p-4 rounded-lg">
                 <h4 className="font-semibold text-blue-600 mb-2">Trend Alert</h4>
-                <p className="text-sm text-gray-600 dark:text-gray-300">Stock dividends are due next week. Expected: $150</p>
+                <p className="text-sm text-muted-foreground">Stock dividends are due next week. Expected: ₹1500</p>
               </div>
-              <div className="bg-white dark:bg-gray-800 p-4 rounded-lg">
+              <div className="bg-card p-4 rounded-lg">
                 <h4 className="font-semibold text-purple-600 mb-2">Goal Progress</h4>
-                <p className="text-sm text-gray-600 dark:text-gray-300">You're 85% towards your monthly goal. Great progress!</p>
+                <p className="text-sm text-muted-foreground">You're 85% towards your monthly goal. Great progress!</p>
               </div>
             </div>
           </CardContent>
@@ -212,7 +218,7 @@ const IncomeTracker = () => {
 
           <TabsContent value="overview" className="space-y-6">
             <div className="grid lg:grid-cols-2 gap-6">
-              <Card className="bg-white dark:bg-gray-800 border-0 shadow-lg">
+              <Card className="bg-card border-0 shadow-lg">
                 <CardHeader>
                   <CardTitle>Top Income Sources</CardTitle>
                 </CardHeader>
@@ -224,14 +230,14 @@ const IncomeTracker = () => {
                           <div className={`w-3 h-3 rounded-full ${index === 0 ? 'bg-green-500' : index === 1 ? 'bg-blue-500' : 'bg-purple-500'}`}></div>
                           <span className="font-medium">{entry.source}</span>
                         </div>
-                        <span className="font-bold">${entry.amount}</span>
+                        <span className="font-bold">₹{entry.amount}</span>
                       </div>
                     ))}
                   </div>
                 </CardContent>
               </Card>
 
-              <Card className="bg-white dark:bg-gray-800 border-0 shadow-lg">
+              <Card className="bg-card border-0 shadow-lg">
                 <CardHeader>
                   <CardTitle>Income vs Expenses</CardTitle>
                 </CardHeader>
@@ -239,16 +245,16 @@ const IncomeTracker = () => {
                   <div className="space-y-4">
                     <div className="flex justify-between items-center">
                       <span>Total Income</span>
-                      <span className="font-bold text-green-600">${totalIncome}</span>
+                      <span className="font-bold text-green-600">₹{totalIncome}</span>
                     </div>
                     <div className="flex justify-between items-center">
                       <span>Estimated Expenses</span>
-                      <span className="font-bold text-red-500">$4,200</span>
+                      <span className="font-bold text-red-500">₹42,000</span>
                     </div>
                     <div className="border-t pt-2">
                       <div className="flex justify-between items-center font-bold">
                         <span>Net Income</span>
-                        <span className="text-green-600">${totalIncome - 4200}</span>
+                        <span className="text-green-600">₹{totalIncome - 42000}</span>
                       </div>
                     </div>
                   </div>
@@ -259,7 +265,7 @@ const IncomeTracker = () => {
 
           <TabsContent value="entries" className="space-y-6">
             {/* Controls */}
-            <Card className="bg-white dark:bg-gray-800 border-0 shadow-lg">
+            <Card className="bg-card border-0 shadow-lg">
               <CardContent className="p-6">
                 <div className="flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center">
                   <div className="flex flex-col sm:flex-row gap-4 flex-1">
@@ -301,7 +307,7 @@ const IncomeTracker = () => {
             </Card>
 
             {/* Income Table */}
-            <Card className="bg-white dark:bg-gray-800 border-0 shadow-lg">
+            <Card className="bg-card border-0 shadow-lg">
               <CardHeader>
                 <div className="flex justify-between items-center">
                   <CardTitle>Income Entries</CardTitle>
@@ -310,7 +316,7 @@ const IncomeTracker = () => {
                       checked={selectedEntries.length === incomeEntries.length}
                       onCheckedChange={handleSelectAll}
                     />
-                    <span className="text-sm text-gray-600">Select All</span>
+                    <span className="text-sm text-muted-foreground">Select All</span>
                   </div>
                 </div>
               </CardHeader>
@@ -331,7 +337,7 @@ const IncomeTracker = () => {
                     </thead>
                     <tbody>
                       {filteredEntries.map((entry) => (
-                        <tr key={entry.id} className="border-b hover:bg-gray-50 dark:hover:bg-gray-700">
+                        <tr key={entry.id} className="border-b hover:bg-accent">
                           <td className="py-3">
                             <Checkbox 
                               checked={selectedEntries.includes(entry.id)}
@@ -339,7 +345,7 @@ const IncomeTracker = () => {
                             />
                           </td>
                           <td className="py-3 font-medium">{entry.source}</td>
-                          <td className="py-3 font-bold text-green-600">${entry.amount}</td>
+                          <td className="py-3 font-bold text-green-600">₹{entry.amount}</td>
                           <td className="py-3">
                             <Badge variant="secondary">{entry.category}</Badge>
                           </td>
@@ -378,7 +384,7 @@ const IncomeTracker = () => {
           </TabsContent>
 
           <TabsContent value="recurring" className="space-y-6">
-            <Card className="bg-white dark:bg-gray-800 border-0 shadow-lg">
+            <Card className="bg-card border-0 shadow-lg">
               <CardHeader>
                 <CardTitle>Recurring Income Sources</CardTitle>
                 <CardDescription>
@@ -395,12 +401,12 @@ const IncomeTracker = () => {
                         </div>
                         <div>
                           <h4 className="font-semibold">{entry.source}</h4>
-                          <p className="text-sm text-gray-600">{entry.frequency} • ${entry.amount}</p>
+                          <p className="text-sm text-muted-foreground">{entry.frequency} • ₹{entry.amount}</p>
                         </div>
                       </div>
                       <div className="text-right">
-                        <p className="font-semibold">${entry.amount}</p>
-                        <p className="text-sm text-gray-600">Next: Feb 15, 2024</p>
+                        <p className="font-semibold">₹{entry.amount}</p>
+                        <p className="text-sm text-muted-foreground">Next: Feb 15, 2024</p>
                       </div>
                     </div>
                   ))}
